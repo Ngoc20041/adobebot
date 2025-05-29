@@ -1,0 +1,16 @@
+{
+  "compatibility_date": "2025-04-01",
+  "main": "src/index.ts",
+  "name": "adobebot",
+  "upload_source_maps": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_id": "20f84ec0-10ea-4332-83fd-c5c72c1d1a5f",
+      "database_name": "adobebot"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
