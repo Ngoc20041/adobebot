@@ -40,14 +40,9 @@ export default {
 
         console.log(`Nhận sự kiện webhook PayPal: ${eventType}`, JSON.stringify(resource));
 
-        // Lưu JSON vào KV
-        if (env.KV_PAYPAL) {
-          await env.KV_PAYPAL.put("latest_webhook", JSON.stringify(body, null, 2));
-        }
-
         // Chuyển tiếp tới backend C#
         if (env.BACKEND_URL) {
-          await fetch(`${env.BACKEND_URL}/api/webhook`, {
+          await fetch(`https://adobebot.buin1905.workers.dev`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
