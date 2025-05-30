@@ -1,41 +1,45 @@
 export default {
-  async fetch(request: { method: string; json: () => any; }, env: any, ctx: any) {
-    if (request.method === "POST") {
-      try {
-        const event = await request.json();
+  async fetch(request: { url: string | URL; method: string; }) {
+    const url = new URL(request.url);
+    if (url.pathname === "/create-order" && request.method === "GET") {
+      const amount = url.searchParams.get("amount") || "5.00"; // USD
+      const userId = url.searchParams.get("user_id") || "anonymous";
 
-        // Kiểm tra loại event từ PayPal
-        if (event.event_type === "PAYMENT.CAPTURE.COMPLETED") {
-          const resource = event.resource;
-          const amount = resource.amount.value;
-          const currency = resource.amount.currency_code;
-          const custom_id = resource.custom_id || "unknown_user";
+      // Gọi PayPal API
+      const auth = btoa("CLIENT_ID:SECRET"); // Thay bằng thông tin thật của bạn
+      const res = await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Basic ${auth}`
+        },
+        body: JSON.stringify({
+          intent: "CAPTURE",
+          purchase_units: [
+            {
+              amount: {
+                currency_code: "USD",
+                value: amount
+              },
+              custom_id: userId
+            }
+          ],
+          application_context: {
+            return_url: "https://yourdomain.com/success",
+            cancel_url: "https://yourdomain.com/cancel"
+          }
+        })
+      });
 
-          // Gửi về Bot Server để cộng credit
-          await fetch("https://your-bot-server.com/api/update-credit", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              user_id: custom_id,
-              credit: amount,
-              currency: currency,
-              source: "paypal"
-            })
-          });
+      const data = await res.json();
 
-          return new Response(JSON.stringify({ status: "credit updated" }), { status: 200 });
-        }
+      // Lấy link redirect
+      // @ts-ignore
+      const approveLink = data.links.find(link => link.rel === "approve").href;
 
-        // Không phải event mình cần
-        return new Response(JSON.stringify({ status: "ignored" }), { status: 200 });
-      } catch (err) {
-        // @ts-ignore
-        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
-      }
+      return Response.redirect(approveLink, 302);
     }
 
-    return new Response("Method Not Allowed", { status: 405 });
+    return new Response("Not Found", { status: 404 });
   }
 }
