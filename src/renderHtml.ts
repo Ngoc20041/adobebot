@@ -1,16 +1,17 @@
-export function renderHtml(json: string): string {
+export function renderHtml(content: string): string {
   return `
     <!DOCTYPE html>
     <html>
       <head>
-        <title>PayPal Webhook Debug</title>
+        <title>PayPal Webhook Viewer</title>
         <style>
-          pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
+          body { font-family: monospace; background: #f9f9f9; padding: 20px; }
+          pre { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
         </style>
       </head>
       <body>
-        <h1>PayPal Webhook JSON</h1>
-        <pre>${json}</pre>
+        <h2>📦 Dữ liệu mới nhất từ PayPal</h2>
+        ${content}
       </body>
     </html>
   `;
