@@ -72,7 +72,7 @@ export default {
         }
 
         // Lấy access token từ PayPal
-        const auth = btoa(`${env.PAYPAL_CLIENT_ID}:${env.PAYPAL_SECRET}`);
+        const auth = btoa(`AegZWyIvAAq9NDPHZ-8fvgfnIhYH4NaJfs1sECYhRLWblaOyV1qCPJF2l6gG2zFyqU0C7MAqQaibPvNY:EBzD7a1HpSO4WuEi555IbyoQQiekgIphtHvOj9LEGEbfgHLoJuD3HfdDSjv_PIYjcw0TntLoNa_nNslj`);
         const tokenResponse = await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token", {
           method: "POST",
           headers: {
