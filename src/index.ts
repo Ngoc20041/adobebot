@@ -113,9 +113,22 @@ export default {
 
     //if request is payment success
     if (url.pathname === '/success') {
+      const orderId = url.searchParams.get('token');
+      const accessToken = await getPaypalAccessToken();
       const content =
-          '🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\nUrl Đơn hàng là :' + url;
-      const html = renderHtml(content);
+          '🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\nId Đơn hàng là :' + orderId;
+      const response = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const orderData = await response.json();
+      console.log('Chi tiết đơn hàng:', orderData);
+
+      const html = renderHtml(content+'\n'+'Oder data la '+orderData);
       return new Response(html, {
         headers: { 'Content-Type': 'text/html' }
       });
