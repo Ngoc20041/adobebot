@@ -1,15 +1,46 @@
 import {renderHtml} from "./renderHtml";
+import {paypalConfig} from "../Config/Config";
 
 let latestWebhookData: any = null;
+// Định nghĩa kiểu cho dữ liệu webhook và capture
+interface WebhookData {
+  id: string;
+  event_type: string;
+  resource: {
+    id: string;
+    intent?: string;
+    status?: string;
+    [key: string]: any;
+  };
+  [key: string]: any;
+}
 
-// Hàm lấy Access Token từ PayPal
+interface CaptureResult {
+  id: string;
+  status: string;
+  purchase_units?: Array<{
+    payments?: {
+      captures?: Array<{
+        id: string;
+        status: string;
+        amount: {
+          currency_code: string;
+          value: string;
+        };
+      }>;
+    };
+  }>;
+  [key: string]: any;
+}
+
+// Get Access Token From PayPal
 async function getPaypalAccessToken(): Promise<string> {
-  const clientId = "AegZWyIvAAq9NDPHZ-8fvgfnIhYH4NaJfs1sECYhRLWblaOyV1qCPJF2l6gG2zFyqU0C7MAqQaibPvNY"; // Thay bằng Client ID của bạn
-  const secret = "EBzD7a1HpSO4WuEi555IbyoQQiekgIphtHvOj9LEGEbfgHLoJuD3HfdDSjv_PIYjcw0TntLoNa_nNslj"; // Thay bằng Secret của bạn
+  const clientId = paypalConfig.clientId;
+  const secret = paypalConfig.secret;
   const auth = btoa(`${clientId}:${secret}`); // Sử dụng btoa để mã hóa Base64
 
   try {
-    const response = await fetch("https://api.sandbox.paypal.com/v1/oauth2/token", {
+    const response = await fetch(paypalConfig.paypal_api_url+"/v1/oauth2/token", {
       method: "POST",
       headers: {
         Authorization: `Basic ${auth}`,
@@ -32,30 +63,56 @@ async function getPaypalAccessToken(): Promise<string> {
   }
 }
 
+// Excute capture payment
+async function capturePayment(orderId: string, accessToken: string): Promise<CaptureResult> {
+  try {
+    const response = await fetch(paypalConfig.paypal_api_url+`/v2/checkout/orders/${orderId}/capture`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({}),
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Lỗi khi capture thanh toán:", error);
+    throw error;
+  }
+}
+
+
 export default {
   async fetch(request: { url: string | URL; method: string; json: () => any }) {
     const url = new URL(request.url);
+    var tokenPaypal = await getPaypalAccessToken();
 
+    //If check status server and token paypal for debug
     if (url.pathname === '/api/status') {
       const content = 'Server is running!';
-      var tokenPaypal = await getPaypalAccessToken();
       const html = renderHtml(content+'\n'+tokenPaypal);
       return new Response(html, {
         headers: { 'Content-Type': 'text/html' }
       });
     }
 
+
+    //If paypal callback
     if (url.pathname === '/api/paypal/webhook' && request.method === 'POST') {
-
-
       try {
-        latestWebhookData = await request.json(); // Lưu dữ liệu webhook
+        tokenPaypal = await getPaypalAccessToken();
+        latestWebhookData = await capturePayment(latestWebhookData.resource.id, tokenPaypal);
+        // latestWebhookData = await request.json(); // Lưu dữ liệu webhook
         return new Response('render data success', { status: 200 });
 
       } catch {
         return new Response('Invalid JSON', { status: 400 });
       }
     }
+
+
+    //if request is payment success
     if (url.pathname === '/success') {
       const content =
           '🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\n\nDữ liệu trả về từ PayPal:\n\n' +
@@ -65,6 +122,8 @@ export default {
         headers: { 'Content-Type': 'text/html' }
       });
     }
+
+    //If user canceled the payment
     if (url.pathname === '/cancel') {
       const content =
       'You have canceled the payment process.'
