@@ -1,5 +1,5 @@
 import {renderHtml} from "./renderHtml";
-import {paypalConfig} from "../Config/Config";
+import {paypalConfig, TelegramConfig} from "../Config/Config";
 
 let latestWebhookData: any = null;
 // Định nghĩa kiểu cho dữ liệu webhook và capture
@@ -31,6 +31,25 @@ interface CaptureResult {
     };
   }>;
   [key: string]: any;
+}
+
+
+// send message to telegram
+async function sendTelegramMessage(message: string, chatId: number) {
+  const botToken = TelegramConfig.tokenBotTelegram;
+
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+  await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: message
+    })
+  });
 }
 
 // Get Access Token From PayPal
@@ -65,6 +84,25 @@ async function getPaypalAccessToken(): Promise<string> {
 
 // Excute capture payment
 async function capturePayment(orderId: string | null, accessToken: string): Promise<CaptureResult> {
+  try {
+    const response = await fetch(`${paypalConfig.paypal_api_url}/v2/checkout/orders/${orderId}/capture`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({}),
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error("Lỗi khi capture thanh toán:", error);
+    throw error;
+  }
+}
+
+// Excute Get oder detail payment
+async function GetOrderDetail(orderId: string | null, accessToken: string): Promise<CaptureResult> {
   try {
     const response = await fetch(`${paypalConfig.paypal_api_url}/v2/checkout/orders/${orderId}/capture`, {
       method: "POST",
@@ -126,11 +164,12 @@ export default {
 
       var dataCapture = await capturePayment(orderId ,accessToken);
 
+      // await sendTelegramMessage(response.);
       const content =
-          `🎉 Thank you for your successful payment via PayPal!\n`;
-          // `Id Oder is : ${orderId}\n` +
-          // `Capture is : ${JSON.stringify(dataCapture, null, 2)}\n` +
-          // `Order data is: ${JSON.stringify(orderData, null, 2)}`; // ← thêm JSON.stringify ở đây
+          `🎉 Thank you for your successful payment via PayPal!\n`+
+          `Id Oder is : ${orderId}\n` +
+          `Capture is : ${JSON.stringify(dataCapture, null, 2)}\n` +
+          `Order data is: ${JSON.stringify(orderData, null, 2)}`; // ← thêm JSON.stringify ở đây
 
       const html = renderHtml(content);
 

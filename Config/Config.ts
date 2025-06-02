@@ -7,5 +7,7 @@ export const paypalConfig = {
         return btoa(`${this.clientId}:${this.secret}`);
     },
     paypal_api_url: "https://api.sandbox.paypal.com",
-    database_url: "https://adobe-stock-bot-default-rtdb.asia-southeast1.firebasedatabase.app/"
+};
+export const TelegramConfig = {
+    tokenBotTelegram: "7740748720:AAEGTTP-veIilS4zwraptEd_yoaC5Z9vzSk",
 };
