@@ -1,6 +1,7 @@
 import {renderHtml} from "./renderHtml";
 
 let latestWebhookData: any = null;
+let webhookHistory: any[] = []; // Mảng lưu trữ lịch sử webhook
 
 export default {
   async fetch(request: { url: string | URL; method: string; json: () => any }) {
@@ -16,15 +17,25 @@ export default {
 
     if (url.pathname === '/api/paypal/webhook' && request.method === 'POST') {
       try {
-        latestWebhookData = await request.json(); // Lưu dữ liệu webhook
-        // Trả luôn dữ liệu webhook về để test
+        latestWebhookData = await request.json();
+        webhookHistory.push(latestWebhookData); // Lưu vào mảng
+        console.log('Webhook Data:', JSON.stringify(latestWebhookData, null, 2));
         return new Response(JSON.stringify(latestWebhookData, null, 2), {
           headers: { 'Content-Type': 'application/json' },
           status: 200
         });
       } catch {
+        console.error('Error parsing JSON');
         return new Response('Invalid JSON', { status: 400 });
       }
+    }
+
+// Endpoint để lấy lịch sử webhook
+    if (url.pathname === '/api/webhook/history' && request.method === 'GET') {
+      return new Response(JSON.stringify(webhookHistory, null, 2), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200
+      });
     }
 
     if (url.pathname === '/') {
