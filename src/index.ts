@@ -101,10 +101,10 @@ export default {
     //If paypal callback
     if (url.pathname === '/api/paypal/webhook' && request.method === 'POST') {
       try {
-        tokenPaypal = await getPaypalAccessToken();
-        latestWebhookData = await capturePayment(latestWebhookData.resource.id, tokenPaypal);
-        // latestWebhookData = await request.json(); // Lưu dữ liệu webhook
-        return new Response('render data success', { status: 200 });
+        // tokenPaypal = await getPaypalAccessToken();
+        // latestWebhookData = await capturePayment(latestWebhookData.resource.id, tokenPaypal);
+        latestWebhookData = await request.json(); // Lưu dữ liệu webhook
+        return new Response('render data success', { status: 205 });
 
       } catch {
         return new Response('Invalid JSON', { status: 400 });
@@ -116,7 +116,7 @@ export default {
     if (url.pathname === '/success') {
       const content =
           '🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\n\nDữ liệu trả về từ PayPal:\n\n' +
-          latestWebhookData;
+          (latestWebhookData ? JSON.stringify(latestWebhookData, null, 2) : 'Không có dữ liệu nào.');
       const html = renderHtml(content);
       return new Response(html, {
         headers: { 'Content-Type': 'text/html' }
