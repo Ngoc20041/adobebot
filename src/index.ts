@@ -13,6 +13,7 @@ export default {
     // 2. Trang hiển thị dữ liệu webhook mới nhất
     if (url.pathname === "/") {
       const html = renderHtml(getLastWebhookHtml());
+      console.log(url.pathname.toString());
       return new Response(html, { headers: { "content-type": "text/html" } });
     }
 
