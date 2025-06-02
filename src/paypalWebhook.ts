@@ -1,18 +1,40 @@
 let lastWebhookData: any = null;
 
-export async function handlePayPalWebhook(request: Request): Promise<Response> {
-    try {
-        const body = await request.json();
-        lastWebhookData = body;
+export async function handlePayPalWebhook(request: Request) {
+    const body = await request.json();
 
-        console.log("[Webhook] Dữ liệu PayPal nhận được:", JSON.stringify(body, null, 2));
+    // Lấy event type
+    // @ts-ignore
+    const eventType = body.event_type;
 
-        return new Response("✅ Webhook đã nhận", { status: 200 });
-    } catch (err) {
-        console.error("❌ Lỗi khi xử lý webhook:", err);
-        return new Response("Bad Request", { status: 400 });
+    if (eventType === "CHECKOUT.ORDER.APPROVED") {
+        // @ts-ignore
+        const resource = body.resource;
+        const purchaseUnit = resource.purchase_units[0];
+
+        // Lấy các thông tin cần thiết
+        const orderId = resource.id;                       // ID đơn PayPal
+        const invoiceId = purchaseUnit.invoice_id;         // Invoice ID bạn tạo
+        const customId = purchaseUnit.custom_id;           // ID tùy chỉnh (ví dụ userId)
+        const description = purchaseUnit.description;      // Mô tả mặt hàng
+        const amount = purchaseUnit.amount.value;           // Tổng tiền
+        const currency = purchaseUnit.amount.currency_code;
+        const payerName = resource.payer.name.given_name + " " + resource.payer.name.surname;
+        const payerEmail = resource.payer.email_address;
+
+        // Ví dụ: lưu vào database hoặc xử lý logic đơn hàng
+        console.log("Order approved:");
+        console.log({ orderId, invoiceId, customId, description, amount, currency, payerName, payerEmail });
+
+        // Trả về 200 OK cho PayPal
+        return new Response("Webhook received", { status: 200 });
     }
+
+    // Xử lý các event khác nếu cần
+
+    return new Response("Event type not handled", { status: 200 });
 }
+
 
 export function getLastWebhookHtml(): string {
     if (!lastWebhookData) {
