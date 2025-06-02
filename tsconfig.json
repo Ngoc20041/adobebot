@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["esnext", "WebWorker"],
+    "lib": ["esnext"],
     "module": "esnext",
     "moduleResolution": "bundler",
-    "types": ["./worker-configuration.d.ts", "@cloudflare/workers-types"],
+    "types": ["./worker-configuration.d.ts"],
     "noEmit": true,
-    "isolatedModulesd": true,
+    "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "strict": true
