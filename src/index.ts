@@ -165,10 +165,13 @@ export default {
       // @ts-ignore
       const chatId = orderData.purchase_units?.[0]?.custom_id;
 
-      const priceMatch = description.match(/\$(\d+(?:\.\d+)?)/);
 
-      const price = priceMatch ? parseFloat(priceMatch[1]) : null;
-      await sendTelegramMessage(`Bạn vừa nhận số tiền ${priceMatch}  UserId: ${chatId}`, TelegramConfig.MessageThreadId);
+      // @ts-ignore
+      const amountValue = orderData.purchase_units?.[0]?.amount?.value;
+      // @ts-ignore
+      const currencyCode = orderData.purchase_units?.[0]?.amount?.currency_code;
+
+      await sendTelegramMessage(`Bạn vừa nhận số tiền ${amountValue} ${currencyCode}  UserId: ${chatId}`, TelegramConfig.MessageThreadId);
 
       const content =
           `🎉 Thank you for your successful payment via PayPal!\n`+
