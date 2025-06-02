@@ -6,7 +6,7 @@ export default {
     const url = new URL(request.url);
 
     // 1. Xử lý webhook từ PayPal
-    if (url.pathname === "/api/paypal/webhook" && request.method === "POST") {
+    if (url.pathname == "/api/paypal/webhook" && request.method === "POST") {
       return await handlePayPalWebhook(request);
     }
 
