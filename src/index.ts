@@ -1,6 +1,6 @@
 export default {
   async fetch(request: Request): Promise<Response> {
-    if (request.method === 'POST' && new URL(request.url).pathname === '/paypal/webhook') {
+    if (request.method === 'POST' && new URL(request.url).pathname === '/api/paypal/webhook') {
       const body = await request.json();
 
       // @ts-ignore
