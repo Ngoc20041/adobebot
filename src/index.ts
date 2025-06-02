@@ -32,6 +32,7 @@ interface CaptureResult {
   }>;
   [key: string]: any;
 }
+
 // Get Access Token From PayPal
 async function getPaypalAccessToken(): Promise<string> {
   const clientId = paypalConfig.clientId;
@@ -63,7 +64,7 @@ async function getPaypalAccessToken(): Promise<string> {
 }
 
 // Excute capture payment
-async function capturePayment(orderId: string, accessToken: string): Promise<CaptureResult> {
+async function capturePayment(orderId: string | null, accessToken: string): Promise<CaptureResult> {
   try {
     const response = await fetch(`${paypalConfig.paypal_api_url}/v2/checkout/orders/${orderId}/capture`, {
       method: "POST",
@@ -126,9 +127,23 @@ export default {
 
       const orderData = await response.json();
 
+
+
+
+
+
+
+      var dataCapture = await capturePayment(orderId ,accessToken);
+
+
+
+
+
+
       const content =
           `🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\n` +
           `Id Đơn hàng là : ${orderId}\n` +
+          `Capture là : ${JSON.stringify(dataCapture, null, 2)}\n` +
           `Order data là: ${JSON.stringify(orderData, null, 2)}`; // ← thêm JSON.stringify ở đây
 
       const html = renderHtml(content);
