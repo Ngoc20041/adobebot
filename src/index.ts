@@ -164,8 +164,15 @@ export default {
       const description = orderData.purchase_units?.[0]?.description;
       // @ts-ignore
       const chatId = orderData.purchase_units?.[0]?.custom_id;
-      await sendTelegramMessage(description, chatId);
-      console.log("Chat ID gửi tới Telegram:", chatId);
+
+
+      const creditMatch = description.match(/(\d+)\s+Credits/);
+      const priceMatch = description.match(/\$(\d+(?:\.\d+)?)/);
+
+      const credits = creditMatch ? parseInt(creditMatch[1]) : null;
+      const price = priceMatch ? parseFloat(priceMatch[1]) : null;
+
+      await sendTelegramMessage('Credit is: '+credits+'\n'+'Price is: '+price, chatId);
 
       const content =
           `🎉 Thank you for your successful payment via PayPal!\n`+
