@@ -127,10 +127,10 @@ export default {
       var dataCapture = await capturePayment(orderId ,accessToken);
 
       const content =
-          `🎉 Thank you for your successful payment via PayPal!\n` ;
-          // `Id Oder is : ${orderId}\n` +
-          // `Capture is : ${JSON.stringify(dataCapture, null, 2)}\n` +
-          // `Order data is: ${JSON.stringify(orderData, null, 2)}`; // ← thêm JSON.stringify ở đây
+          `🎉 Thank you for your successful payment via PayPal!\n` +
+          `Id Oder is : ${orderId}\n` +
+          `Capture is : ${JSON.stringify(dataCapture, null, 2)}\n` +
+          `Order data is: ${JSON.stringify(orderData, null, 2)}`; // ← thêm JSON.stringify ở đây
 
       const html = renderHtml(content);
 
