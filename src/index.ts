@@ -137,8 +137,6 @@ export default {
     //If paypal callback
     if (url.pathname === '/api/paypal/webhook' && request.method === 'POST') {
       try {
-        // tokenPaypal = await getPaypalAccessToken();
-        // latestWebhookData = await capturePayment(latestWebhookData.resource.id, tokenPaypal);
         latestWebhookData = await request.json(); // Lưu dữ liệu webhook
         return new Response('render data success', { status: 200 });
 
@@ -161,10 +159,12 @@ export default {
       });
 
       const orderData = await response.json();
-
       var dataCapture = await capturePayment(orderId ,accessToken);
-
-      // await sendTelegramMessage(response.);
+      // @ts-ignore
+      const description = orderData.purchase_units?.[0]?.description;
+      // @ts-ignore
+      const chatId = orderData.purchase_units?.[0]?.custom_id;
+      await sendTelegramMessage(description, chatId);
       const content =
           `🎉 Thank you for your successful payment via PayPal!\n`+
           `Id Oder is : ${orderId}\n` +
