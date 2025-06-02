@@ -9,7 +9,7 @@ export const paypalConfig = {
     paypal_api_url: "https://api.sandbox.paypal.com",
 };
 export const TelegramConfig = {
-    tokenBotTelegram: "7740748720:AAEGTTP-veIilS4zwraptEd_yoaC5Z9vzSk",
+    tokenBotTelegram: "7892722624:AAHWbVPB0uKf7wchRT-xlAZyJltdM5tsTrg",
     MessageThreadId:10596,
     idGroup: -1002328295199,
 };
