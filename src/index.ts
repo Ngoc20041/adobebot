@@ -1,6 +1,5 @@
 import {renderHtml} from "./renderHtml";
 import {paypalConfig} from "../Config/Config";
-import { PaypalWebhookData } from '../Interface/interface';
 
 let latestWebhookData: any = null;
 // Định nghĩa kiểu cho dữ liệu webhook và capture
@@ -32,24 +31,6 @@ interface CaptureResult {
     };
   }>;
   [key: string]: any;
-}
-//save data to server no sql
-export async function sendPaypalWebhookData(data: PaypalWebhookData): Promise<void> {
-  const response = await fetch(`${paypalConfig.database_url}/payments`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('Lỗi khi gửi dữ liệu PayPal:', errorText);
-    throw new Error('Gửi dữ liệu thất bại');
-  }
-
-  console.log('Gửi dữ liệu PayPal thành công!');
 }
 // Get Access Token From PayPal
 async function getPaypalAccessToken(): Promise<string> {
@@ -122,7 +103,6 @@ export default {
         // tokenPaypal = await getPaypalAccessToken();
         // latestWebhookData = await capturePayment(latestWebhookData.resource.id, tokenPaypal);
         latestWebhookData = await request.json(); // Lưu dữ liệu webhook
-        await sendPaypalWebhookData(latestWebhookData);
         return new Response('render data success', { status: 200 });
 
       } catch {
@@ -133,10 +113,8 @@ export default {
 
     //if request is payment success
     if (url.pathname === '/success') {
-      console.log(url);
       const content =
-          '🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\n\nDữ liệu trả về từ PayPal:\n\n' +
-          (latestWebhookData ? JSON.stringify(latestWebhookData, null, 2) : 'Không có dữ liệu nào.');
+          '🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\nUrl Đơn hàng là :' + url;
       const html = renderHtml(content);
       return new Response(html, {
         headers: { 'Content-Type': 'text/html' }
