@@ -1,9 +1,18 @@
+import {renderHtml} from "./renderHtml";
+
 export default {
   async fetch(request: { url: string | URL; method: string; json: () => any; }) {
     const url = new URL(request.url);
 
     if (url.pathname === '/api/status') {
       return new Response('Server is running', { headers: { 'Content-Type': 'text/plain' } });
+    }
+    if (url.pathname === '/') {
+      const content = '🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!';
+      const html = renderHtml(content);
+      return new Response(html, {
+        headers: { 'Content-Type': 'text/html' }
+      });
     }
 
     if (url.pathname === '/api/paypal/webhook' && request.method === 'POST') {
