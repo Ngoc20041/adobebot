@@ -19,6 +19,7 @@
     "publish": true
   },
   "devDependencies": {
+    "@types/express": "^5.0.2",
     "typescript": "5.8.3",
     "wrangler": "4.16.1"
   },
@@ -29,5 +30,9 @@
     "dev": "wrangler dev",
     "predeploy": "wrangler d1 migrations apply DB --remote",
     "seedLocalD1": "wrangler d1 migrations apply DB --local"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "express": "^5.1.0"
   }
 }

@@ -1,22 +1,43 @@
-import { handlePayPalWebhook, getLastWebhookHtml } from "./paypalWebhook";
-import { renderHtml } from "./renderHtml";
-
+// export default {
+//   async fetch(request: Request): Promise<Response> {
+//     if (request.method === 'POST' && new URL(request.url).pathname === '/paypal/webhook') {
+//       const body = await request.json();
+//
+//       // @ts-ignore
+//       const eventType = body.event_type;
+//       // @ts-ignore
+//       const resource = body.resource;
+//
+//       console.log('💡 PayPal webhook event:', eventType);
+//
+//       if (eventType === 'CHECKOUT.ORDER.APPROVED') {
+//         console.log('✅ Order approved:', resource.id);
+//         // Ghi log / cập nhật database ở đây
+//       }
+//
+//       if (eventType === 'PAYMENT.CAPTURE.COMPLETED') {
+//         console.log('💰 Payment completed:', resource.purchase_units?.[0]?.amount?.value);
+//       }
+//
+//       return new Response(JSON.stringify({ status: 'ok' }), {
+//         status: 200,
+//         headers: { 'Content-Type': 'application/json' }
+//       });
+//     }
+//
+//     return new Response('Not found', { status: 404 });
+//   }
+// };
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
+  async fetch(request: Request): Promise<Response> {
+    if (request.method === 'POST' && new URL(request.url).pathname === '/paypal/webhook') {
+      const rawBody = await request.text(); // đọc thô nội dung gửi đến
+      console.log("📦 Nhận được webhook từ PayPal:");
+      console.log(rawBody); // log ra toàn bộ JSON gửi từ PayPal
 
-    // 1. Xử lý webhook từ PayPal
-    if (url.pathname == "/api/paypal/webhook" && request.method === "POST") {
-      return await handlePayPalWebhook(request);
+      return new Response("Webhook received", { status: 200 });
     }
 
-    // 2. Trang hiển thị dữ liệu webhook mới nhất
-    if (url.pathname === "/") {
-      const html = renderHtml(getLastWebhookHtml());
-      console.log(url.pathname.toString());
-      return new Response(html, { headers: { "content-type": "text/html" } });
-    }
-
-    return new Response("404 Not Found", { status: 404 });
+    return new Response("Not Found", { status: 404 });
   },
-} satisfies ExportedHandler<Env>;
+};
