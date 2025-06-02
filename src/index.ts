@@ -43,24 +43,52 @@
 //     return new Response('Not Found', { status: 404 });
 //   }
 // };
-import { renderHtml } from './renderHtml'; // nếu bạn tách file
+import {renderHtml} from "./renderHtml";
 
-export default {
-  async fetch(request: Request): Promise<Response> {
-    if (request.method === "POST" && new URL(request.url).pathname === "/api/paypal/webhook") {
-      const body = await request.json();
+export async function fetch(request: Request): Promise<Response> {
+  const url = new URL(request.url);
 
-      const formatted = JSON.stringify(body, null, 2); // định dạng đẹp
-      const html = renderHtml(formatted);
-
-      return new Response(html, {
-        headers: {
-          "Content-Type": "text/html; charset=utf-8",
-        },
-        status: 200,
-      });
-    }
-
-    return new Response("Not Found", { status: 404 });
+  if (url.pathname === '/api/paypal/webhook') {
+    // Đây là webhook callback, xử lý dữ liệu PayPal gửi về
+    return handleWebhook(request);
   }
-};
+
+  if (url.pathname === '/success') {
+    // Đây là trang hiển thị khi PayPal redirect người dùng về
+    return handleSuccess(request);
+  }
+
+  // Các route khác
+  return new Response('Not Found', { status: 404 });
+}
+
+async function handleWebhook(request: Request): Promise<Response> {
+  const contentType = request.headers.get('content-type') || '';
+  let data;
+  if (contentType.includes('application/json')) {
+    data = await request.json();
+  } else {
+    data = await request.text();
+  }
+
+  // Bạn có thể log hoặc xử lý dữ liệu webhook ở đây
+
+  // Hiển thị ra html để xem dữ liệu webhook (cho test)
+  return new Response(renderHtml(JSON.stringify(data, null, 2)), {
+    headers: { 'content-type': 'text/html;charset=UTF-8' },
+  });
+}
+
+async function handleSuccess(request: Request): Promise<Response> {
+  // Trả về trang thành công, có thể là html đơn giản
+  return new Response(`
+    <html>
+      <body>
+        <h1>Thanh toán thành công! Cảm ơn bạn đã mua hàng.</h1>
+      </body>
+    </html>
+  `, {
+    headers: { 'content-type': 'text/html;charset=UTF-8' },
+  });
+}
+
