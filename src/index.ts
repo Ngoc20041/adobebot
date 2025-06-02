@@ -1,26 +1,22 @@
-export interface Env {}
+import { Router } from 'itty-router';
+
+const router = Router();
+
+router.post('/api/paypal/webhook', async (request) => {
+  const data = await request.json();
+  return new Response(JSON.stringify(data, null, 2), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+});
+
+router.get('/api/status', () => {
+  return new Response('Server is running', { headers: { 'Content-Type': 'text/plain' } });
+});
+
+router.all('*', () => new Response('Not Found', { status: 404 }));
 
 export default {
-  async fetch(request: Request, env: Env) {
-    if (request.method === "POST") {
-      try {
-        const data = await request.json();  // lấy JSON từ body webhook
-        // trả về JSON dạng text (đẹp)
-        return new Response(JSON.stringify(data, null, 2), {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json; charset=utf-8",
-          },
-        });
-      } catch (err) {
-        return new Response("Invalid JSON", { status: 400 });
-      }
-    }
-    return new Response("Send POST request with JSON webhook data", {
-      status: 200,
-      headers: {
-        "Content-Type": "text/plain",
-      },
-    });
+  async fetch(request: Request) {
+    return router.handle(request);
   },
 };
