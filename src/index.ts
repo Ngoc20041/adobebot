@@ -114,6 +114,7 @@ export default {
 
     //if request is payment success
     if (url.pathname === '/success') {
+      console.log(url);
       const content =
           '🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\n\nDữ liệu trả về từ PayPal:\n\n' +
           (latestWebhookData ? JSON.stringify(latestWebhookData, null, 2) : 'Không có dữ liệu nào.');
