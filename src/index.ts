@@ -30,6 +30,15 @@ export default {
         headers: { 'Content-Type': 'text/html' }
       });
     }
+
+    if (url.pathname === '/cancel') {
+      const content = 'You have canceled the payment'
+      const html = renderHtml(content);
+      return new Response(html, {
+        headers: { 'Content-Type': 'text/html' }
+      });
+    }
+
     if (url.pathname === '/success') {
       const content =
           '🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\n\nDữ liệu trả về từ PayPal:\n\n' +
