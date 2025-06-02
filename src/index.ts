@@ -169,7 +169,7 @@ export default {
 
       const credits = creditMatch ? parseInt(creditMatch[1]) : null;
 
-      await sendTelegramMessage(`Credit is: ${creditMatch}`, chatId);
+      await sendTelegramMessage(`Credit is: ${credits}`, chatId);
 
       const content =
           `🎉 Thank you for your successful payment via PayPal!\n`+
