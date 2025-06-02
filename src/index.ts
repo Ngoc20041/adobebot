@@ -30,7 +30,7 @@
 // };
 export default {
   async fetch(request: Request): Promise<Response> {
-    if (request.method === 'POST' && new URL(request.url).pathname === '/paypal/webhook') {
+    if (request.method === 'POST' && new URL(request.url).pathname === '/api/paypal/webhook') {
       const rawBody = await request.text(); // đọc thô nội dung gửi đến
       console.log("📦 Nhận được webhook từ PayPal:");
       console.log(rawBody); // log ra toàn bộ JSON gửi từ PayPal
