@@ -115,9 +115,8 @@ export default {
     if (url.pathname === '/success') {
       const orderId = url.searchParams.get('token');
       const accessToken = await getPaypalAccessToken();
-      const content =
-          '🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\nId Đơn hàng là :' + orderId;
-      const response = await fetch(`https://api-m.paypal.com/v2/checkout/orders/${orderId}`, {
+
+      const response = await fetch(`${paypalConfig.paypal_api_url}/v2/checkout/orders/${orderId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -126,9 +125,14 @@ export default {
       });
 
       const orderData = await response.json();
-      console.log('Chi tiết đơn hàng:', orderData);
 
-      const html = renderHtml(content+'\n'+'Oder data la '+orderData);
+      const content =
+          `🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\n` +
+          `Id Đơn hàng là : ${orderId}\n` +
+          `Order data là: ${JSON.stringify(orderData, null, 2)}`; // ← thêm JSON.stringify ở đây
+
+      const html = renderHtml(content);
+
       return new Response(html, {
         headers: { 'Content-Type': 'text/html' }
       });
