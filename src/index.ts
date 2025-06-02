@@ -165,14 +165,11 @@ export default {
       // @ts-ignore
       const chatId = orderData.purchase_units?.[0]?.custom_id;
 
-
       const creditMatch = description.match(/(\d+)\s+Credits/);
-      const priceMatch = description.match(/\$(\d+(?:\.\d+)?)/);
 
       const credits = creditMatch ? parseInt(creditMatch[1]) : null;
-      const price = priceMatch ? parseFloat(priceMatch[1]) : null;
 
-      await sendTelegramMessage('Credit is: '+credits+'\n'+'Price is: '+price, chatId);
+      await sendTelegramMessage(`Credit is: ${creditMatch}`, chatId);
 
       const content =
           `🎉 Thank you for your successful payment via PayPal!\n`+
