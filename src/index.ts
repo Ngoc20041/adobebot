@@ -35,20 +35,27 @@ interface CaptureResult {
 
 
 // send message to telegram
-async function sendTelegramMessage(message: string, chatId: number) {
+async function sendTelegramMessage(message: string, chatId: number, threadId?: number) {
   const botToken = TelegramConfig.tokenBotTelegram;
 
   const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+  const body: any = {
+    chat_id: chatId,
+    text: message,
+  };
+
+  // Nếu có threadId, thêm vào payload
+  if (threadId !== undefined) {
+    body.message_thread_id = threadId;
+  }
 
   await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      chat_id: chatId,
-      text: message
-    })
+    body: JSON.stringify(body)
   });
 }
 
@@ -171,7 +178,7 @@ export default {
       // @ts-ignore
       const currencyCode = orderData.purchase_units?.[0]?.amount?.currency_code;
 
-      await sendTelegramMessage(`Bạn vừa nhận số tiền ${amountValue} ${currencyCode}  UserId: ${chatId}`, TelegramConfig.MessageThreadId);
+      await sendTelegramMessage(`Bạn vừa nhận số tiền ${amountValue} ${currencyCode}  UserId: ${chatId}`, TelegramConfig.idGroup, TelegramConfig.MessageThreadId);
 
       const content =
           `🎉 Thank you for your successful payment via PayPal!\n`+

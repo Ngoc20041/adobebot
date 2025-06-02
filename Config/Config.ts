@@ -10,5 +10,6 @@ export const paypalConfig = {
 };
 export const TelegramConfig = {
     tokenBotTelegram: "7740748720:AAEGTTP-veIilS4zwraptEd_yoaC5Z9vzSk",
-    MessageThreadId: -1002617755119,
+    MessageThreadId:10596,
+    idGroup: -1002328295199,
 };
