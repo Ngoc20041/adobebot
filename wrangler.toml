@@ -1,0 +1,9 @@
+name = "paypalCallback"
+type = "javascript"
+account_id = "6a0e59548ef2473cbda734d080707b5f"
+workers_dev = true
+compatibility_date = "2025-06-02"
+
+kv_namespaces = [
+  { binding = "PAYPAL_CALLBACK", id = "6a0e59548ef2473cbda734d080707b5f" }
+]
