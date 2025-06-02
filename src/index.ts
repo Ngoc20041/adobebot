@@ -168,7 +168,7 @@ export default {
       const priceMatch = description.match(/\$(\d+(?:\.\d+)?)/);
 
       const price = priceMatch ? parseFloat(priceMatch[1]) : null;
-      await sendTelegramMessage(`Bạn vừa nhận số tiền ${price}  UserId: ${chatId}`, TelegramConfig.MessageThreadId);
+      await sendTelegramMessage(`Bạn vừa nhận số tiền ${priceMatch}  UserId: ${chatId}`, TelegramConfig.MessageThreadId);
 
       const content =
           `🎉 Thank you for your successful payment via PayPal!\n`;
