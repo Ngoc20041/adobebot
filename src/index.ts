@@ -1,4 +1,4 @@
-import { renderHtml } from "./renderHtml";
+import {renderHtml} from "./renderHtml";
 
 let latestWebhookData: any = null;
 
@@ -16,11 +16,9 @@ export default {
 
     if (url.pathname === '/api/paypal/webhook' && request.method === 'POST') {
       try {
-        const data = await request.json();
-        latestWebhookData = data; // Lưu dữ liệu webhook
-        return new Response(`Data is: ${JSON.stringify(data)}`, {
-          headers: { 'Content-Type': 'application/json' }
-        });
+        latestWebhookData = await request.json(); // Lưu dữ liệu webhook
+        return new Response('render data success', { status: 200 });
+
       } catch {
         return new Response('Invalid JSON', { status: 400 });
       }
