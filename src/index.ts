@@ -82,7 +82,6 @@ async function capturePayment(orderId: string | null, accessToken: string): Prom
   }
 }
 
-
 export default {
   async fetch(request: { url: string | URL; method: string; json: () => any }) {
     const url = new URL(request.url);
@@ -97,7 +96,6 @@ export default {
       });
     }
 
-
     //If paypal callback
     if (url.pathname === '/api/paypal/webhook' && request.method === 'POST') {
       try {
@@ -110,7 +108,6 @@ export default {
         return new Response('Invalid JSON', { status: 400 });
       }
     }
-
 
     //if request is payment success
     if (url.pathname === '/success') {
@@ -127,24 +124,13 @@ export default {
 
       const orderData = await response.json();
 
-
-
-
-
-
-
       var dataCapture = await capturePayment(orderId ,accessToken);
 
-
-
-
-
-
       const content =
-          `🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\n` +
-          `Id Đơn hàng là : ${orderId}\n` +
-          `Capture là : ${JSON.stringify(dataCapture, null, 2)}\n` +
-          `Order data là: ${JSON.stringify(orderData, null, 2)}`; // ← thêm JSON.stringify ở đây
+          `🎉 Thank you for your successful payment via PayPal!\n` ;
+          // `Id Oder is : ${orderId}\n` +
+          // `Capture is : ${JSON.stringify(dataCapture, null, 2)}\n` +
+          // `Order data is: ${JSON.stringify(orderData, null, 2)}`; // ← thêm JSON.stringify ở đây
 
       const html = renderHtml(content);
 
@@ -156,13 +142,12 @@ export default {
     //If user canceled the payment
     if (url.pathname === '/cancel') {
       const content =
-      'You have canceled the payment process.'
+      'You have canceled the payment process.'+ '\nContact with admin if you have any question: https://t.me/SoaiNhoBe'
       const html = renderHtml(content);
       return new Response(html, {
         headers: { 'Content-Type': 'text/html' }
       });
     }
-
     return new Response('Not Found', { status: 404 });
   }
 };
