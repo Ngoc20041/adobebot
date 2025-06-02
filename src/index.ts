@@ -6,7 +6,7 @@ export default {
 
     console.log('🚀 Request:', request.url);
 
-    return new Response('Not found', { status: 404 });
+    return new Response('ok', { status: 200 });
   }
 };
 
