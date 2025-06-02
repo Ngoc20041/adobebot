@@ -17,12 +17,16 @@ export default {
     if (url.pathname === '/api/paypal/webhook' && request.method === 'POST') {
       try {
         latestWebhookData = await request.json(); // Lưu dữ liệu webhook
-        return new Response('render data success', { status: 200 });
-
+        // Trả luôn dữ liệu webhook về để test
+        return new Response(JSON.stringify(latestWebhookData, null, 2), {
+          headers: { 'Content-Type': 'application/json' },
+          status: 200
+        });
       } catch {
         return new Response('Invalid JSON', { status: 400 });
       }
     }
+
     if (url.pathname === '/') {
       const content = 'Hello This ís page by AdobeStock Bot'
       const html = renderHtml(content);
