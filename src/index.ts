@@ -23,8 +23,14 @@ export default {
         return new Response('Invalid JSON', { status: 400 });
       }
     }
-
     if (url.pathname === '/') {
+      const content = 'Hello This ís page by AdobeStock Bot'
+      const html = renderHtml(content);
+      return new Response(html, {
+        headers: { 'Content-Type': 'text/html' }
+      });
+    }
+    if (url.pathname === '/success') {
       const content =
           '🎉 Cảm ơn bạn đã thanh toán thành công qua PayPal!\n\nDữ liệu trả về từ PayPal:\n\n' +
           (latestWebhookData ? JSON.stringify(latestWebhookData, null, 2) : 'Không có dữ liệu nào.');

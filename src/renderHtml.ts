@@ -36,7 +36,7 @@ export function renderHtml(content: string): string {
       </head>
       <body>
         <div class="container">
-          <h2>📦 Dữ liệu mới nhất từ PayPal</h2>
+          <h2>📦 Infomation</h2>
           <pre>${content}</pre>
         </div>
       </body>
