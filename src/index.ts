@@ -1,3 +1,6 @@
+// @ts-ignore
+import * as console from "node:console";
+
 export default {
   async fetch(request: Request): Promise<Response> {
     if (request.method === 'POST' && new URL(request.url).pathname === '/api/paypal/webhook') {
@@ -24,6 +27,7 @@ export default {
         headers: { 'Content-Type': 'application/json' }
       });
     }
+    console.log('🚀 Request:', request.url);
 
     return new Response('Not found', { status: 404 });
   }
