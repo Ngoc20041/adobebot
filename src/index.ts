@@ -165,6 +165,8 @@ export default {
       // @ts-ignore
       const chatId = orderData.purchase_units?.[0]?.custom_id;
       await sendTelegramMessage(description, chatId);
+      console.log("Chat ID gửi tới Telegram:", chatId);
+
       const content =
           `🎉 Thank you for your successful payment via PayPal!\n`+
           `Id Oder is : ${orderId}\n` +
