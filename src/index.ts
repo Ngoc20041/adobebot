@@ -183,7 +183,7 @@ export default {
       // @ts-ignore
       const currencyCode = orderData.purchase_units?.[0]?.amount?.currency_code;
 
-      await sendTelegramMessage(`${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${userId}`, TelegramConfig.idChannel);
+      await sendTelegramMessage(`${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${userId} - MessageId: ${messageId}`, TelegramConfig.idChannel);
       await sendTelegramMessage(`Price: ${amountValue} ${currencyCode} - UserId: ${userId} - MessageId: ${messageId}`, TelegramConfig.idGroup, TelegramConfig.MessageThreadId);
 
       const content =
