@@ -170,17 +170,21 @@ export default {
       // @ts-ignore
       const description = orderData.purchase_units?.[0]?.description;
       // @ts-ignore
-      const chatId = orderData.purchase_units?.[0]?.custom_id;
+      const InfoUser = orderData.purchase_units?.[0]?.custom_id;
 
+      const [userIdStr, messageIdStr] = InfoUser.split(':');
+
+      // Ép kiểu thành double (số thực)
+      const userId = parseFloat(userIdStr);
+      const messageId = parseFloat(messageIdStr);
 
       // @ts-ignore
       const amountValue = orderData.purchase_units?.[0]?.amount?.value;
       // @ts-ignore
       const currencyCode = orderData.purchase_units?.[0]?.amount?.currency_code;
 
-      // await sendTelegramMessage(`Price: ${amountValue}${currencyCode} - UserId: ${chatId}`, chatId);
-      await sendTelegramMessage(`${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${chatId}`, TelegramConfig.idChannel);
-      await sendTelegramMessage(`Price: ${amountValue} ${currencyCode} - UserId: ${chatId}`, TelegramConfig.idGroup, TelegramConfig.MessageThreadId);
+      await sendTelegramMessage(`${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${userId}`, TelegramConfig.idChannel);
+      await sendTelegramMessage(`Price: ${amountValue} ${currencyCode} - UserId: ${userId} - MessageId: ${messageId}`, TelegramConfig.idGroup, TelegramConfig.MessageThreadId);
 
       const content =
           `🎉 Thank you for your successful payment via PayPal!\n`;
