@@ -179,7 +179,7 @@ export default {
       const currencyCode = orderData.purchase_units?.[0]?.amount?.currency_code;
 
       // await sendTelegramMessage(`Price: ${amountValue}${currencyCode} - UserId: ${chatId}`, chatId);
-      await sendTelegramMessage(`@adobe_test_bot Price: ${amountValue}${currencyCode} - UserId: ${chatId}`, TelegramConfig.idGroup, TelegramConfig.MessageThreadId);
+      await sendTelegramMessage(`Price: ${amountValue}${currencyCode} - UserId: ${chatId}`, TelegramConfig.idGroup, TelegramConfig.MessageThreadId);
 
       const content =
           `🎉 Thank you for your successful payment via PayPal!\n`;
