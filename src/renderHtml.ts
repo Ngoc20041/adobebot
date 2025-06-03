@@ -1,3 +1,5 @@
+import {TelegramConfig} from "../Config/Config";
+
 export function renderHtml(content: string): string {
   return `
     <!DOCTYPE html>
@@ -32,12 +34,26 @@ export function renderHtml(content: string): string {
             white-space: pre-wrap;
             word-break: break-word;
           }
+          .back-button {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.6rem 1.2rem;
+            background-color: #0070ba;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+          }
+          .back-button:hover {
+            background-color: #005f98;
+          }
         </style>
       </head>
       <body>
         <div class="container">
           <h2>📦 Infomation</h2>
           <pre>${content}</pre>
+          <a class="back-button" href="https://t.me/${TelegramConfig.botName}">🔙 Back To Bot</a>
         </div>
       </body>
     </html>
