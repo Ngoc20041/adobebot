@@ -184,13 +184,12 @@ export default {
       const currencyCode = orderData.purchase_units?.[0]?.amount?.currency_code;
 
       await sendTelegramMessage(`${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${userId} - MessageId: ${messageId}`, TelegramConfig.idChannel);
-      await sendTelegramMessage(`Price: ${amountValue} ${currencyCode} - UserId: ${userId} - MessageId: ${messageId}`, TelegramConfig.idGroup, TelegramConfig.MessageThreadId);
 
       const content =
-          `🎉 Thank you for your successful payment via PayPal!\n`+
-          `Id Oder is : ${orderId}\n` +
-          `Capture is : ${JSON.stringify(dataCapture, null, 2)}\n` +
-          `Order data is: ${JSON.stringify(orderData, null, 2)}`; // ← thêm JSON.stringify ở đây
+          `🎉 Thank you for your successful payment via PayPal!\n`;
+          // `Id Oder is : ${orderId}\n` +
+          // `Capture is : ${JSON.stringify(dataCapture, null, 2)}\n` +
+          // `Order data is: ${JSON.stringify(orderData, null, 2)}`; // ← thêm JSON.stringify ở đây
 
       const html = renderHtml(content);
 
