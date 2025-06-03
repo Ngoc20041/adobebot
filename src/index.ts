@@ -180,6 +180,7 @@ export default {
 
       // await sendTelegramMessage(`Price: ${amountValue}${currencyCode} - UserId: ${chatId}`, chatId);
       await sendTelegramMessage(`${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${chatId}`, TelegramConfig.idChannel);
+      await sendTelegramMessage(`Price: ${amountValue} ${currencyCode} - UserId: ${chatId}`, TelegramConfig.idGroup, TelegramConfig.MessageThreadId);
 
       const content =
           `🎉 Thank you for your successful payment via PayPal!\n`;
