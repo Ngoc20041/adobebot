@@ -197,7 +197,7 @@ export default {
     //If user canceled the payment
     if (url.pathname === '/cancel') {
       const content =
-      'You have canceled the payment process.'+ '\nContact with admin if you have any question: https://t.me/SoaiNhoBe'
+      'You have canceled the payment process.'+ '\nContact with admin if you have any question: <a>https://t.me/SoaiNhoBe</a>'
       const html = renderHtml(content);
       return new Response(html, {
         headers: { 'Content-Type': 'text/html' }
