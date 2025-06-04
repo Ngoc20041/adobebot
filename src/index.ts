@@ -209,7 +209,15 @@ export default {
         headers: { "Content-Type": "text/html" },
       });
     }
-
+    // Xử lý webhook PayPal
+    if (url.pathname === "/api/nowpayment/webhook" && request.method === "POST") {
+      try {
+        latestWebhookData = await request.json();
+        return new Response("render data success", { status: 200 });
+      } catch {
+        return new Response("Invalid JSON", { status: 400 });
+      }
+    }
     // Xử lý thanh toán NowPayments thành công
     if (url.pathname === "/nowpayments/success") {
       const paymentId = url.searchParams.get("NP_id");
@@ -233,10 +241,6 @@ export default {
       }
       const detail = paymentDetail as NowPaymentsOrderDetail;
       const [userIdStr, messageIdStr] = detail.order_id.split(":");
-
-      // const NowPaymentsuserId = userIdStr; // hoặc parseInt(userIdStr) nếu cần số
-      // const NowPaymentsmessageId = messageIdStr; // hoặc parseInt(messageIdStr)
-
       // Kiểm tra trạng thái thanh toán
       if (detail.payment_status === "finished") {
         // Gửi thông báo qua Telegram
