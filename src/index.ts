@@ -236,7 +236,8 @@ export default {
         });
       }
       if (paymentDetail) {
-        const content = `🎉 Thank you for your successful payment with NowPayments!\nPayment ID: ${paymentId}\nAmount: ${paymentDetail.amount} ${paymentDetail.currency}\nStatus: ${paymentDetail.payment_status}`;
+        const content = `🎉 Thank you for your successful payment with NowPayments!`+
+            `Order Details:\n  ${JSON.stringify(paymentDetail, null, 2)}`;
         const html = renderHtml(content);
         return new Response(html, {
           headers: { "Content-Type": "text/html" },
