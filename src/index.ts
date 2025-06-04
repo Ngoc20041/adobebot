@@ -262,7 +262,7 @@ export default {
       }
 
       // Kiểm tra trạng thái thanh toán
-      if (status === "finished" || status === "confirmed") {
+      if (status === "finished") {
         // Gửi thông báo qua Telegram
         await sendTelegramMessage(
             `Payment successful! Payment ID: ${paymentId}, Status: ${status}`,
