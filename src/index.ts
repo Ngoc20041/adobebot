@@ -209,15 +209,6 @@ export default {
         headers: { "Content-Type": "text/html" },
       });
     }
-    // Xử lý webhook PayPal
-    if (url.pathname === "/api/nowpayment/webhook" && request.method === "POST") {
-      try {
-        latestWebhookData = await request.json();
-        return new Response("render data success", { status: 200 });
-      } catch {
-        return new Response("Invalid JSON", { status: 400 });
-      }
-    }
     // Xử lý thanh toán NowPayments thành công
     if (url.pathname === "/nowpayments/success") {
       const paymentId = url.searchParams.get("NP_id");
