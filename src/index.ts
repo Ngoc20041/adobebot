@@ -138,9 +138,7 @@ async function getNowPaymentsStatus(paymentId: string): Promise<NowPaymentsOrder
       console.error(`❌ Error: ${errorText}`);
       return null;
     }
-
-    const data: NowPaymentsOrderDetail = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error(`❌ Error fetching payment status: ${error}`);
     return null;
@@ -226,7 +224,7 @@ export default {
       }
 
 
-      const paymentDetail = await getNowPaymentsStatus(paymentId);
+      var paymentDetail = await getNowPaymentsStatus(paymentId);
       if (!paymentDetail) {
         const content = `Error: Failed to retrieve payment status for NP_id: ${paymentId}.`;
         const html = renderHtml(content);
@@ -235,35 +233,33 @@ export default {
           status: 500,
         });
       }
-      if (paymentDetail) {
-        const content = `🎉 Thank you for your successful payment with NowPayments!`+
+      const detail = paymentDetail as NowPaymentsOrderDetail;
+      const [userIdStr, messageIdStr] = detail.order_id.split(":");
+
+      const NowPaymentsuserId = userIdStr; // hoặc parseInt(userIdStr) nếu cần số
+      const NowPaymentsmessageId = messageIdStr; // hoặc parseInt(messageIdStr)
+
+      // Kiểm tra trạng thái thanh toán
+      if (detail.payment_status === "finished") {
+        // Gửi thông báo qua Telegram
+        await sendTelegramMessage(
+            `${TelegramConfig.idChannel} Price: ${detail.amount} ${detail.currency} - UserId: ${NowPaymentsuserId} - MessageId: ${NowPaymentsmessageId}`,
+            TelegramConfig.idChannel
+        );
+        const content = `🎉 Thank you for your successful payment with NowPayments!\n`+
             `Order Details:\n  ${JSON.stringify(paymentDetail, null, 2)}`;
         const html = renderHtml(content);
         return new Response(html, {
           headers: { "Content-Type": "text/html" },
         });
+      } else {
+        const content = `Payment not completed. Payment ID: ${paymentId}, Status: ${paymentDetail.payment_status}`;
+        const html = renderHtml(content);
+        return new Response(html, {
+          headers: { "Content-Type": "text/html" },
+          status: 400,
+        });
       }
-      // // Kiểm tra trạng thái thanh toán
-      // if (paymentDetail.payment_status === "finished") {
-      //   // Gửi thông báo qua Telegram
-      //   await sendTelegramMessage(
-      //       `${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${userId} - MessageId: ${messageId}`,
-      //       TelegramConfig.idChannel
-      //   );
-      //
-      //   const content = `🎉 Thank you for your successful payment with NowPayments!\nPayment ID: ${paymentId}\nAmount: ${paymentDetail.amount} ${paymentDetail.currency}\nStatus: ${paymentDetail.payment_status}`;
-      //   const html = renderHtml(content);
-      //   return new Response(html, {
-      //     headers: { "Content-Type": "text/html" },
-      //   });
-      // } else {
-      //   const content = `Payment not completed. Payment ID: ${paymentId}, Status: ${paymentDetail.payment_status}`;
-      //   const html = renderHtml(content);
-      //   return new Response(html, {
-      //     headers: { "Content-Type": "text/html" },
-      //     status: 400,
-      //   });
-      // }
     }
 
     // Xử lý hủy thanh toán NowPayments
