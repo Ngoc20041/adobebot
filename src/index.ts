@@ -39,8 +39,8 @@ interface CaptureResult {
 interface NowPaymentsOrderDetail {
   payment_id: string;
   payment_status: string;
-  amount: number;
-  currency: string;
+  pay_amount: number;
+  price_currency: string;
   order_id: string;
   order_description?: string;
   invoice_id: string;
@@ -241,7 +241,7 @@ export default {
       if (detail.payment_status === "finished") {
         // Gửi thông báo qua Telegram
         await sendTelegramMessage(
-            `${TelegramConfig.idChannel} Price: ${detail.amount} ${detail.currency} - UserId: ${userIdStr} - MessageId: ${messageIdStr}`,
+            `${TelegramConfig.idChannel} Price: ${detail.pay_amount} ${detail.price_currency} - UserId: ${userIdStr} - MessageId: ${messageIdStr}`,
             TelegramConfig.idChannel
         );
         const content = `🎉 Thank you for your successful payment with NowPayments!\n`+
