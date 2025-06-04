@@ -222,8 +222,6 @@ export default {
           status: 400,
         });
       }
-
-
       var paymentDetail = await getNowPaymentsStatus(paymentId);
       if (!paymentDetail) {
         const content = `Error: Failed to retrieve payment status for NP_id: ${paymentId}.`;
@@ -236,14 +234,14 @@ export default {
       const detail = paymentDetail as NowPaymentsOrderDetail;
       const [userIdStr, messageIdStr] = detail.order_id.split(":");
 
-      const NowPaymentsuserId = userIdStr; // hoặc parseInt(userIdStr) nếu cần số
-      const NowPaymentsmessageId = messageIdStr; // hoặc parseInt(messageIdStr)
+      // const NowPaymentsuserId = userIdStr; // hoặc parseInt(userIdStr) nếu cần số
+      // const NowPaymentsmessageId = messageIdStr; // hoặc parseInt(messageIdStr)
 
       // Kiểm tra trạng thái thanh toán
       if (detail.payment_status === "finished") {
         // Gửi thông báo qua Telegram
         await sendTelegramMessage(
-            `${TelegramConfig.idChannel} Price: ${detail.amount} ${detail.currency} - UserId: ${NowPaymentsuserId} - MessageId: ${NowPaymentsmessageId}`,
+            `${TelegramConfig.idChannel} Price: ${detail.amount} ${detail.currency} - UserId: ${userIdStr} - MessageId: ${messageIdStr}`,
             TelegramConfig.idChannel
         );
         const content = `🎉 Thank you for your successful payment with NowPayments!\n`+
