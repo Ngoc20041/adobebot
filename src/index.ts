@@ -164,7 +164,6 @@ export default {
           'Content-Type': 'application/json'
         }
       });
-
       const orderData = await response.json();
       var dataCapture = await capturePayment(orderId ,accessToken);
       // @ts-ignore
@@ -186,7 +185,7 @@ export default {
       await sendTelegramMessage(`${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${userId} - MessageId: ${messageId}`, TelegramConfig.idChannel);
 
       const content =
-          `🎉 Thank you for your successful payment via PayPal!\n`;
+          `🎉 Thank you for your successful payment with PayPal!\n`;
           // `Id Oder is : ${orderId}\n` +
           // `Capture is : ${JSON.stringify(dataCapture, null, 2)}\n` +
           // `Order data is: ${JSON.stringify(orderData, null, 2)}`; // ← thêm JSON.stringify ở đây
@@ -198,6 +197,35 @@ export default {
       });
     }
 
+
+
+    //if request is payment with nowpayment success
+    if (url.pathname === '/nowpayments/success') {
+      const content = `
+        Thank you for your successful payment with Nowpayments!\n`;`
+      `;
+
+      const html = renderHtml(content);
+      return new Response(html, {
+        headers: { 'Content-Type': 'text/html' }
+      });
+    }
+
+
+
+    //If user canceled the payment
+    if (url.pathname === '/nowpayments/cancel') {
+      const content = `
+        You have canceled the payment process.<br/>
+        Contact with admin if you have any question: 
+        <a href="https://t.me/SoaiNhoBe" target="_blank">https://t.me/SoaiNhoBe</a>
+      `;
+
+      const html = renderHtml(content);
+      return new Response(html, {
+        headers: { 'Content-Type': 'text/html' }
+      });
+    }
     //If user canceled the payment
     if (url.pathname === '/cancel') {
       const content = `
