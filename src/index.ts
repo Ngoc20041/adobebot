@@ -1,8 +1,9 @@
-import {renderHtml} from "./renderHtml";
-import {NowPaymentsConfig, paypalConfig, TelegramConfig} from "../Config/Config";
+import { renderHtml } from "./renderHtml";
+import { paypalConfig, TelegramConfig, NowPaymentsConfig } from "../Config/Config";
 
 let latestWebhookData: any = null;
-// Định nghĩa kiểu cho dữ liệu webhook và capture
+
+// Định nghĩa kiểu cho dữ liệu webhook PayPal
 interface WebhookData {
   id: string;
   event_type: string;
@@ -15,6 +16,7 @@ interface WebhookData {
   [key: string]: any;
 }
 
+// Định nghĩa kiểu cho capture PayPal
 interface CaptureResult {
   id: string;
   status: string;
@@ -32,33 +34,22 @@ interface CaptureResult {
   }>;
   [key: string]: any;
 }
-//check payment nowpayments
-async function getNowPaymentsStatus(paymentId: string): Promise<string | null> {
-  try {
-    const response = await fetch(`${NowPaymentsConfig.Nowpayment_api_url}/v1/payment/${paymentId}`, {
-      method: "GET",
-      headers: {
-        "x-api-key": NowPaymentsConfig.NowPaymentapiKey,
-        "Content-Type": "application/json",
-      },
-    });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`❌ Error: ${errorText}`);
-      return null;
-    }
-
-    const data = await response.json();
-    // @ts-ignore
-    return data;
-  } catch (error) {
-    console.error(`❌ Error fetching payment status: ${error}`);
-    return null;
-  }
+// Định nghĩa kiểu cho phản hồi NowPayments
+interface NowPaymentsOrderDetail {
+  payment_id: string;
+  payment_status: string;
+  amount: number;
+  currency: string;
+  order_id: string;
+  order_description?: string;
+  invoice_id: string;
+  created_at: string;
+  updated_at: string;
+  [key: string]: any;
 }
 
-// send message to telegram
+// Gửi tin nhắn qua Telegram
 async function sendTelegramMessage(message: string, chatId: number, threadId?: number) {
   const botToken = TelegramConfig.tokenBotTelegram;
 
@@ -69,7 +60,6 @@ async function sendTelegramMessage(message: string, chatId: number, threadId?: n
     text: message,
   };
 
-  // Nếu có threadId, thêm vào payload
   if (threadId !== undefined) {
     body.message_thread_id = threadId;
   }
@@ -77,17 +67,17 @@ async function sendTelegramMessage(message: string, chatId: number, threadId?: n
   await fetch(url, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
   });
 }
 
-// Get Access Token From PayPal
+// Lấy access token từ PayPal
 async function getPaypalAccessToken(): Promise<string> {
   const clientId = paypalConfig.clientId;
   const secret = paypalConfig.secret;
-  const auth = btoa(`${clientId}:${secret}`); // Sử dụng btoa để mã hóa Base64
+  const auth = btoa(`${clientId}:${secret}`);
 
   try {
     const response = await fetch(`${paypalConfig.paypal_api_url}/v1/oauth2/token`, {
@@ -113,7 +103,7 @@ async function getPaypalAccessToken(): Promise<string> {
   }
 }
 
-// Excute capture payment
+// Thực hiện capture thanh toán PayPal
 async function capturePayment(orderId: string | null, accessToken: string): Promise<CaptureResult> {
   try {
     const response = await fetch(`${paypalConfig.paypal_api_url}/v2/checkout/orders/${orderId}/capture`, {
@@ -132,22 +122,28 @@ async function capturePayment(orderId: string | null, accessToken: string): Prom
   }
 }
 
-// Excute Get oder detail payment
-async function GetOrderDetail(orderId: string | null, accessToken: string): Promise<CaptureResult> {
+// Kiểm tra trạng thái thanh toán NowPayments
+async function getNowPaymentsStatus(paymentId: string): Promise<NowPaymentsOrderDetail | null> {
   try {
-    const response = await fetch(`${paypalConfig.paypal_api_url}/v2/checkout/orders/${orderId}/capture`, {
-      method: "POST",
+    const response = await fetch(`${NowPaymentsConfig.Nowpayment_api_url}/v1/payment/${paymentId}`, {
+      method: "GET",
       headers: {
+        "x-api-key": NowPaymentsConfig.NowPaymentapiKey,
         "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify({}),
     });
 
-    return await response.json();
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Error: ${errorText}`);
+      return null;
+    }
+
+    const data: NowPaymentsOrderDetail = await response.json();
+    return data;
   } catch (error) {
-    console.error("Lỗi khi capture thanh toán:", error);
-    throw error;
+    console.error(`❌ Error fetching payment status: ${error}`);
+    return null;
   }
 }
 
@@ -156,48 +152,45 @@ export default {
     const url = new URL(request.url);
     var tokenPaypal = await getPaypalAccessToken();
 
-    //If check status server and token paypal for debug
-    if (url.pathname === '/api/status') {
-      const content = 'Server is running!';
-      const html = renderHtml(content+'\n'+tokenPaypal);
+    // Kiểm tra trạng thái server và token PayPal để debug
+    if (url.pathname === "/api/status") {
+      const content = "Server is running!";
+      const html = renderHtml(content + "\n" + tokenPaypal);
       return new Response(html, {
-        headers: { 'Content-Type': 'text/html' }
+        headers: { "Content-Type": "text/html" },
       });
     }
 
-    //If paypal callback
-    if (url.pathname === '/api/paypal/webhook' && request.method === 'POST') {
+    // Xử lý webhook PayPal
+    if (url.pathname === "/api/paypal/webhook" && request.method === "POST") {
       try {
-        latestWebhookData = await request.json(); // Lưu dữ liệu webhook
-        return new Response('render data success', { status: 200 });
-
+        latestWebhookData = await request.json();
+        return new Response("render data success", { status: 200 });
       } catch {
-        return new Response('Invalid JSON', { status: 400 });
+        return new Response("Invalid JSON", { status: 400 });
       }
     }
 
-    //if request is payment success
-    if (url.pathname === '/success') {
-      const orderId = url.searchParams.get('token');
+    // Xử lý thanh toán PayPal thành công
+    if (url.pathname === "/success") {
+      const orderId = url.searchParams.get("token");
       const accessToken = await getPaypalAccessToken();
 
       const response = await fetch(`${paypalConfig.paypal_api_url}/v2/checkout/orders/${orderId}`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
       });
       const orderData = await response.json();
-      var dataCapture = await capturePayment(orderId ,accessToken);
+      var dataCapture = await capturePayment(orderId, accessToken);
       // @ts-ignore
       const description = orderData.purchase_units?.[0]?.description;
       // @ts-ignore
       const InfoUser = orderData.purchase_units?.[0]?.custom_id;
 
-      const [userIdStr, messageIdStr] = InfoUser.split(':');
-
-      // Ép kiểu thành double (số thực)
+      const [userIdStr, messageIdStr] = InfoUser.split(":");
       const userId = parseFloat(userIdStr);
       const messageId = parseFloat(messageIdStr);
 
@@ -206,23 +199,22 @@ export default {
       // @ts-ignore
       const currencyCode = orderData.purchase_units?.[0]?.amount?.currency_code;
 
-      await sendTelegramMessage(`${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${userId} - MessageId: ${messageId}`, TelegramConfig.idChannel);
+      await sendTelegramMessage(
+          `${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${userId} - MessageId: ${messageId}`,
+          TelegramConfig.idChannel
+      );
 
-      const content =
-          `🎉 Thank you for your successful payment with PayPal!\n`;
-          // `Id Oder is : ${orderId}\n` +
-          // `Capture is : ${JSON.stringify(dataCapture, null, 2)}\n` +
-          // `Order data is: ${JSON.stringify(orderData, null, 2)}`; // ← thêm JSON.stringify ở đây
-
+      const content = `🎉 Thank you for your successful payment with PayPal!\n`;
       const html = renderHtml(content);
 
       return new Response(html, {
-        headers: { 'Content-Type': 'text/html' }
+        headers: { "Content-Type": "text/html" },
       });
     }
-    //If user canceled the payment
+
+    // Xử lý thanh toán NowPayments thành công
     if (url.pathname === "/nowpayments/success") {
-      const paymentId = url.searchParams.get("NP_id"); // Lấy NP_id từ query string
+      const paymentId = url.searchParams.get("NP_id");
 
       if (!paymentId) {
         const content = "Error: Missing NP_id parameter.";
@@ -233,41 +225,38 @@ export default {
         });
       }
 
-      const DataResponse = await getNowPaymentsStatus(paymentId);
-      if (!DataResponse) {
+
+      const paymentDetail = await getNowPaymentsStatus(paymentId);
+      if (!paymentDetail) {
         const content = `Error: Failed to retrieve payment status for NP_id: ${paymentId}.`;
         const html = renderHtml(content);
         return new Response(html, {
-          headers: {"Content-Type": "text/html"},
+          headers: { "Content-Type": "text/html" },
           status: 500,
         });
       }
-
-
-      const content =
-          `🎉 Thank you for your successful payment with NowPayment!\n`+
-      `Id Oder is : ${paymentId}\n` +
-      `Order Detail is : ${JSON.stringify(DataResponse, null, 2)}\n` ;
-
-      const html = renderHtml(content);
-
-      return new Response(html, {
-        headers: { 'Content-Type': 'text/html' }
-      });
+      if (paymentDetail) {
+        const content = `🎉 Thank you for your successful payment with NowPayments!\nPayment ID: ${paymentId}\nAmount: ${paymentDetail.amount} ${paymentDetail.currency}\nStatus: ${paymentDetail.payment_status}`;
+        const html = renderHtml(content);
+        return new Response(html, {
+          headers: { "Content-Type": "text/html" },
+        });
+      }
       // // Kiểm tra trạng thái thanh toán
-      // if (status === "finished") {
+      // if (paymentDetail.payment_status === "finished") {
       //   // Gửi thông báo qua Telegram
       //   await sendTelegramMessage(
-      //       `${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${paymentId} - MessageId: ${status}`, TelegramConfig.idChannel
+      //       `${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${userId} - MessageId: ${messageId}`,
+      //       TelegramConfig.idChannel
       //   );
       //
-      //   const content = `🎉 Thank you for your successful payment with NowPayments!\nPayment ID: ${paymentId}\nStatus: ${status}`;
+      //   const content = `🎉 Thank you for your successful payment with NowPayments!\nPayment ID: ${paymentId}\nAmount: ${paymentDetail.amount} ${paymentDetail.currency}\nStatus: ${paymentDetail.payment_status}`;
       //   const html = renderHtml(content);
       //   return new Response(html, {
       //     headers: { "Content-Type": "text/html" },
       //   });
       // } else {
-      //   const content = `Payment not completed. Payment ID: ${paymentId}, Status: ${status}`;
+      //   const content = `Payment not completed. Payment ID: ${paymentId}, Status: ${paymentDetail.payment_status}`;
       //   const html = renderHtml(content);
       //   return new Response(html, {
       //     headers: { "Content-Type": "text/html" },
@@ -276,8 +265,8 @@ export default {
       // }
     }
 
-    //If user canceled the payment
-    if (url.pathname === '/cancel') {
+    // Xử lý hủy thanh toán NowPayments
+    if (url.pathname === "/nowpayments/cancel") {
       const content = `
         You have canceled the payment process.<br/>
         Contact with admin if you have any question: 
@@ -286,9 +275,24 @@ export default {
 
       const html = renderHtml(content);
       return new Response(html, {
-        headers: { 'Content-Type': 'text/html' }
+        headers: { "Content-Type": "text/html" },
       });
     }
-    return new Response('Not Found', { status: 404 });
-  }
+
+    // Xử lý hủy thanh toán PayPal
+    if (url.pathname === "/cancel") {
+      const content = `
+        You have canceled the payment process.<br/>
+        Contact with admin if you have any question: 
+        <a href="https://t.me/SoaiNhoBe" target="_blank">https://t.me/SoaiNhoBe</a>
+      `;
+
+      const html = renderHtml(content);
+      return new Response(html, {
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+
+    return new Response("Not Found", { status: 404 });
+  },
 };
