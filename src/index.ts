@@ -220,25 +220,7 @@ export default {
         headers: { 'Content-Type': 'text/html' }
       });
     }
-
-
-
-    //if request is payment with nowpayment success
-    if (url.pathname === '/nowpayments/success') {
-      const content = `
-        Thank you for your successful payment with Nowpayments!\n`;`
-      `;
-
-      const html = renderHtml(content);
-      return new Response(html, {
-        headers: { 'Content-Type': 'text/html' }
-      });
-    }
-
-
-
     //If user canceled the payment
-
     if (url.pathname === "/nowpayments/success") {
       const paymentId = url.searchParams.get("NP_id"); // Lấy NP_id từ query string
 
