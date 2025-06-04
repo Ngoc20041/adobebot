@@ -1,5 +1,5 @@
 import {renderHtml} from "./renderHtml";
-import {paypalConfig, TelegramConfig} from "../Config/Config";
+import {NowPaymentsConfig, paypalConfig, TelegramConfig} from "../Config/Config";
 
 let latestWebhookData: any = null;
 // Định nghĩa kiểu cho dữ liệu webhook và capture
@@ -32,7 +32,31 @@ interface CaptureResult {
   }>;
   [key: string]: any;
 }
+//check payment nowpayments
+async function getNowPaymentsStatus(paymentId: string): Promise<string | null> {
+  try {
+    const response = await fetch(`${NowPaymentsConfig.Nowpayment_api_url}/v1/payment/${paymentId}`, {
+      method: "GET",
+      headers: {
+        "x-api-key": NowPaymentsConfig.NowPaymentapiKey,
+        "Content-Type": "application/json",
+      },
+    });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`❌ Error: ${errorText}`);
+      return null;
+    }
+
+    const data = await response.json();
+    // @ts-ignore
+    return data.payment_status;
+  } catch (error) {
+    console.error(`❌ Error fetching payment status: ${error}`);
+    return null;
+  }
+}
 
 // send message to telegram
 async function sendTelegramMessage(message: string, chatId: number, threadId?: number) {
@@ -214,18 +238,52 @@ export default {
 
 
     //If user canceled the payment
-    if (url.pathname === '/nowpayments/cancel') {
-      const content = `
-        You have canceled the payment process.<br/>
-        Contact with admin if you have any question: 
-        <a href="https://t.me/SoaiNhoBe" target="_blank">https://t.me/SoaiNhoBe</a>
-      `;
 
-      const html = renderHtml(content);
-      return new Response(html, {
-        headers: { 'Content-Type': 'text/html' }
-      });
+    if (url.pathname === "/nowpayments/success") {
+      const paymentId = url.searchParams.get("NP_id"); // Lấy NP_id từ query string
+
+      if (!paymentId) {
+        const content = "Error: Missing NP_id parameter.";
+        const html = renderHtml(content);
+        return new Response(html, {
+          headers: { "Content-Type": "text/html" },
+          status: 400,
+        });
+      }
+
+      const status = await getNowPaymentsStatus(paymentId);
+      if (!status) {
+        const content = `Error: Failed to retrieve payment status for NP_id: ${paymentId}.`;
+        const html = renderHtml(content);
+        return new Response(html, {
+          headers: { "Content-Type": "text/html" },
+          status: 500,
+        });
+      }
+
+      // Kiểm tra trạng thái thanh toán
+      if (status === "finished" || status === "confirmed") {
+        // Gửi thông báo qua Telegram
+        await sendTelegramMessage(
+            `Payment successful! Payment ID: ${paymentId}, Status: ${status}`,
+            TelegramConfig.idChannel
+        );
+
+        const content = `🎉 Thank you for your successful payment with NowPayments!\nPayment ID: ${paymentId}\nStatus: ${status}`;
+        const html = renderHtml(content);
+        return new Response(html, {
+          headers: { "Content-Type": "text/html" },
+        });
+      } else {
+        const content = `Payment not completed. Payment ID: ${paymentId}, Status: ${status}`;
+        const html = renderHtml(content);
+        return new Response(html, {
+          headers: { "Content-Type": "text/html" },
+          status: 400,
+        });
+      }
     }
+
     //If user canceled the payment
     if (url.pathname === '/cancel') {
       const content = `
