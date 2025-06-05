@@ -31,7 +31,7 @@ export default {
     }
 
     // Xử lý thanh toán PayPal thành công
-    if (url.pathname === "/success") {
+    if (url.pathname === "/paypal/success") {
       const orderId = url.searchParams.get("token");
       const accessToken = await getPaypalAccessToken();
 
