@@ -11,11 +11,12 @@ export const paypalConfig = {
     paypal_api_url: "https://api-m.sandbox.paypal.com",
 };
 export const TelegramConfig = {
-    tokenBotTelegram: "8039983944:AAGwY6MdMdrRD16Zcdl1HOw8ovMU1VMkqYw",
-    // tokenBotTelegram: "7892722624:AAHWbVPB0uKf7wchRT-xlAZyJltdM5tsTrg",
+    // tokenBotTelegram: "8039983944:AAGwY6MdMdrRD16Zcdl1HOw8ovMU1VMkqYw",
+    tokenBotTelegram: "7892722624:AAHWbVPB0uKf7wchRT-xlAZyJltdM5tsTrg", // bbn bot
     idGroup: -1002328295199,
     MessageThreadId: 10678,
-    idChannel: -1002313174879,
+    // idChannel: -1002313174879,
+    idChannel: -1002899420511, // test
     botName: "adobe_test_bot",
 };
 export const NowPaymentsConfig = {
