@@ -63,7 +63,7 @@ export default {
       //     TelegramConfig.idChannel
       // );
       await sendTelegramMessage(
-          `PayPal:\n<pre>${JSON.stringify(orderData, null, 2)}</pre>\nend`,
+          `PayPal:\n<pre>${JSON.stringify(orderData, null, 2)}</pre>\n`,
           TelegramConfig.idChannel,
           undefined,
           'HTML' // hoặc Markdown, tùy format bạn muốn
@@ -103,7 +103,7 @@ export default {
       if (detail.payment_status === "finished") {
         // Gửi thông báo qua Telegram
         await sendTelegramMessage(
-            `NowPayments:\n<pre>${JSON.stringify(detail, null, 2)}</pre>\nend`,
+            `NowPayments:\n<pre>${JSON.stringify(detail, null, 2)}</pre>\n`,
             TelegramConfig.idChannel,
             undefined,
             'HTML' // hoặc Markdown, tùy format bạn muốn
