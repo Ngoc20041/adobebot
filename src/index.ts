@@ -1,154 +1,15 @@
 import { renderHtml } from "./renderHtml";
-import { paypalConfig, TelegramConfig, NowPaymentsConfig } from "../Config/Config";
-
+import { paypalConfig, TelegramConfig } from "../Config/Config";
+import {NowPaymentsOrderDetail} from "./Interface/InterfaceNowPayments"
+import {getPaypalAccessToken, capturePayment} from "./PayPal/PayPalService";
+import {sendTelegramMessage} from "./Telegram/TelegramService";
+import {getNowPaymentsStatus} from "./NowPayments/NowPaymentsService";
 let latestWebhookData: any = null;
-
-// Định nghĩa kiểu cho dữ liệu webhook PayPal
-interface WebhookData {
-  id: string;
-  event_type: string;
-  resource: {
-    id: string;
-    intent?: string;
-    status?: string;
-    [key: string]: any;
-  };
-  [key: string]: any;
-}
-
-// Định nghĩa kiểu cho capture PayPal
-interface CaptureResult {
-  id: string;
-  status: string;
-  purchase_units?: Array<{
-    payments?: {
-      captures?: Array<{
-        id: string;
-        status: string;
-        amount: {
-          currency_code: string;
-          value: string;
-        };
-      }>;
-    };
-  }>;
-  [key: string]: any;
-}
-
-// Định nghĩa kiểu cho phản hồi NowPayments
-interface NowPaymentsOrderDetail {
-  payment_id: string;
-  payment_status: string;
-  pay_amount: number;
-  price_currency: string;
-  order_id: string;
-  order_description?: string;
-  invoice_id: string;
-  created_at: string;
-  updated_at: string;
-  [key: string]: any;
-}
-
-// Gửi tin nhắn qua Telegram
-async function sendTelegramMessage(message: string, chatId: number, threadId?: number) {
-  const botToken = TelegramConfig.tokenBotTelegram;
-
-  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-
-  const body: any = {
-    chat_id: chatId,
-    text: message,
-  };
-
-  if (threadId !== undefined) {
-    body.message_thread_id = threadId;
-  }
-
-  await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-}
-
-// Lấy access token từ PayPal
-async function getPaypalAccessToken(): Promise<string> {
-  const clientId = paypalConfig.clientId;
-  const secret = paypalConfig.secret;
-  const auth = btoa(`${clientId}:${secret}`);
-
-  try {
-    const response = await fetch(`${paypalConfig.paypal_api_url}/v1/oauth2/token`, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${auth}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: "grant_type=client_credentials",
-    });
-
-    const data = await response.json();
-    // @ts-ignore
-    if (data.access_token) {
-      // @ts-ignore
-      return data.access_token;
-    } else {
-      throw new Error("Không thể lấy access token");
-    }
-  } catch (error) {
-    console.error("Lỗi khi lấy access token:", error);
-    throw error;
-  }
-}
-
-// Thực hiện capture thanh toán PayPal
-async function capturePayment(orderId: string | null, accessToken: string): Promise<CaptureResult> {
-  try {
-    const response = await fetch(`${paypalConfig.paypal_api_url}/v2/checkout/orders/${orderId}/capture`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({}),
-    });
-
-    return await response.json();
-  } catch (error) {
-    console.error("Lỗi khi capture thanh toán:", error);
-    throw error;
-  }
-}
-
-// Kiểm tra trạng thái thanh toán NowPayments
-async function getNowPaymentsStatus(paymentId: string): Promise<NowPaymentsOrderDetail | null> {
-  try {
-    const response = await fetch(`${NowPaymentsConfig.Nowpayment_api_url}/v1/payment/${paymentId}`, {
-      method: "GET",
-      headers: {
-        "x-api-key": NowPaymentsConfig.NowPaymentapiKey,
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`❌ Error: ${errorText}`);
-      return null;
-    }
-    return await response.json();
-  } catch (error) {
-    console.error(`❌ Error fetching payment status: ${error}`);
-    return null;
-  }
-}
 
 export default {
   async fetch(request: { url: string | URL; method: string; json: () => any }) {
     const url = new URL(request.url);
-    var tokenPaypal = await getPaypalAccessToken();
+    const tokenPaypal = await getPaypalAccessToken();
 
     // Kiểm tra trạng thái server và token PayPal để debug
     if (url.pathname === "/api/status") {
@@ -170,7 +31,7 @@ export default {
     }
 
     // Xử lý thanh toán PayPal thành công
-    if (url.pathname === "/success") {
+    if (url.pathname === "/paypal/success") {
       const orderId = url.searchParams.get("token");
       const accessToken = await getPaypalAccessToken();
 
@@ -182,7 +43,7 @@ export default {
         },
       });
       const orderData = await response.json();
-      var dataCapture = await capturePayment(orderId, accessToken);
+      const dataCapture = await capturePayment(orderId, accessToken);
       // @ts-ignore
       const description = orderData.purchase_units?.[0]?.description;
       // @ts-ignore
@@ -236,7 +97,7 @@ export default {
       if (detail.payment_status === "finished") {
         // Gửi thông báo qua Telegram
         await sendTelegramMessage(
-            `${TelegramConfig.idChannel} Price: ${detail.pay_amount} ${detail.price_currency} - UserId: ${userIdStr} - MessageId: ${messageIdStr}`,
+            `NowPayments:\n${detail}\nend`,
             TelegramConfig.idChannel
         );
         const content = `🎉 Thank you for your successful payment with NowPayments!\n`+
@@ -270,7 +131,7 @@ export default {
     }
 
     // Xử lý hủy thanh toán PayPal
-    if (url.pathname === "/cancel") {
+    if (url.pathname === "/paypal/cancel") {
       const content = `
         You have canceled the payment process.<br/>
         Contact with admin if you have any question: 
@@ -283,6 +144,6 @@ export default {
       });
     }
 
-    return new Response("Not Found", { status: 404 });
+    return new Response("Router Not Found", { status: 404 });
   },
 };
