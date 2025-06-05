@@ -58,9 +58,15 @@ export default {
       // @ts-ignore
       const currencyCode = orderData.purchase_units?.[0]?.amount?.currency_code;
 
+      // await sendTelegramMessage(
+      //     `${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${userId} - MessageId: ${messageId}`,
+      //     TelegramConfig.idChannel
+      // );
       await sendTelegramMessage(
-          `${TelegramConfig.idChannel} Price: ${amountValue} ${currencyCode} - UserId: ${userId} - MessageId: ${messageId}`,
-          TelegramConfig.idChannel
+          `PayPal:\n<pre>${JSON.stringify(orderData, null, 2)}</pre>\nend`,
+          TelegramConfig.idChannel,
+          undefined,
+          'HTML' // hoặc Markdown, tùy format bạn muốn
       );
 
       const content = `🎉 Thank you for your successful payment with PayPal!\n`;
@@ -97,9 +103,12 @@ export default {
       if (detail.payment_status === "finished") {
         // Gửi thông báo qua Telegram
         await sendTelegramMessage(
-            `NowPayments:\n${detail}\nend`,
-            TelegramConfig.idChannel
+            `NowPayments:\n<pre>${JSON.stringify(detail, null, 2)}</pre>\nend`,
+            TelegramConfig.idChannel,
+            undefined,
+            'HTML' // hoặc Markdown, tùy format bạn muốn
         );
+
         const content = `🎉 Thank you for your successful payment with NowPayments!\n`+
             `Order Details:\n  ${JSON.stringify(paymentDetail, null, 2)}`;
         const html = renderHtml(content);

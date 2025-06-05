@@ -1,7 +1,11 @@
 import { paypalConfig, TelegramConfig, NowPaymentsConfig } from "../../Config/Config";
 
-// Gửi tin nhắn qua Telegram
-export async function sendTelegramMessage(message: string, chatId: number, threadId?: number) {
+export async function sendTelegramMessage(
+    message: string,
+    chatId: number,
+    threadId?: number,
+    parseMode: "Markdown" | "HTML" = "HTML" // Thêm lựa chọn kiểu format
+) {
     const botToken = TelegramConfig.tokenBotTelegram;
 
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
@@ -9,6 +13,7 @@ export async function sendTelegramMessage(message: string, chatId: number, threa
     const body: any = {
         chat_id: chatId,
         text: message,
+        parse_mode: parseMode, // ✅ Thêm dòng này
     };
 
     if (threadId !== undefined) {
