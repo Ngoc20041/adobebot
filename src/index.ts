@@ -105,8 +105,8 @@ export default {
             'HTML' // hoặc Markdown, tùy format bạn muốn
         );
 
-        const content = `🎉 Thank you for your successful payment with NowPayments!\n`+
-            `Order Details:\n  ${JSON.stringify(paymentDetail, null, 2)}`;
+        const content = `🎉 Thank you for your successful payment with NowPayments!\n`;
+            // `Order Details:\n  ${JSON.stringify(paymentDetail, null, 2)}`;
         const html = renderHtml(content);
         return new Response(html, {
           headers: { "Content-Type": "text/html" },
