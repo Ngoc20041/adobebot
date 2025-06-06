@@ -15,8 +15,8 @@ export const TelegramConfig = {
     // tokenBotTelegram: "7892722624:AAHWbVPB0uKf7wchRT-xlAZyJltdM5tsTrg", // bbn bot
     idGroup: -1002328295199,
     MessageThreadId: 10678,
-    idChannel: -1002313174879,
-    // idChannel: -1002899420511, // test
+    // idChannel: -1002313174879,
+    idChannel: -1002899420511, // test
     botName: "adobe_test_bot",
 };
 export const NowPaymentsConfig = {
