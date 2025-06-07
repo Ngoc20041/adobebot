@@ -20,6 +20,9 @@ export const TelegramConfig = {
     botName: "adobe_test_bot",
 };
 export const NowPaymentsConfig = {
-    Nowpayment_api_url: "https://api-sandbox.nowpayments.io", //  sandbox
-    NowPaymentapiKey: "PAMSQ4S-94HMCHZ-P6SE5K9-K3JWBPM", // Thay bằng API key thực tế
+    // Nowpayment_api_url: "https://api-sandbox.nowpayments.io", //  sandbox
+    // NowPaymentapiKey: "PAMSQ4S-94HMCHZ-P6SE5K9-K3JWBPM",//  sandbox
+
+    Nowpayment_api_url: "https://api.nowpayments.io",
+    NowPaymentapiKey: "KSZR9F7-W0QMYMN-QV7XBM3-XV4RP2E",
 };
